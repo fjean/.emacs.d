@@ -1,2 +1,2 @@
-# .emacs.d
-My Emacs settings
+# Emacs Settings
+The Emacs settings and packages I use.
