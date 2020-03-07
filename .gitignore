@@ -4,3 +4,4 @@
 # But ...
 !.gitignore
 !init.el
+!README.md
