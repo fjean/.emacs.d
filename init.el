@@ -45,13 +45,13 @@
 (tool-bar-mode -1)
 (blink-cursor-mode -1)
 (global-hl-line-mode t)
-(make-variable-buffer-local 'global-hl-line-mode)
 (line-number-mode 1)
 (column-number-mode 1)
 (setq ring-bell-function 'ignore)
 (setq inhibit-startup-screen t)
 (setq-default fill-column 80)
-(setq initial-scratch-message ";; Scratch buffer")
+(setq initial-major-mode 'fundamental-mode)
+(setq initial-scratch-message "-------------------------------- Scratch buffer --------------------------------\n")
 (add-hook 'server-switch-hook #'raise-frame)
 
 ;; Delete move files to trash
@@ -353,7 +353,7 @@
   :commands (enfine/wikipedia engine/search-google)
   :config
   (engine-mode t)
-  (engine/set-keymap-prefix (kbd "C-c s"))
+  (engine/set-keymap-prefix (kbd "C-x /"))
   (defengine wikipedia
     "http://www.wikipedia.org/search-redirect.php?language=en&go=Go&search=%s"
     :keybinding "w")
@@ -371,7 +371,7 @@
   (add-hook 'vterm-mode-hook
             (lambda ()
               (display-line-numbers-mode -1)
-              (setq global-hl-line-mode nil))) )
+              (setq-local global-hl-line-mode nil))) )
 
 (use-package pdf-tools
   :pin manual
