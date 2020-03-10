@@ -36,7 +36,8 @@
       scroll-preserve-screen-position 1)
 
 ;; Custom theme folder
-(add-to-list 'custom-theme-load-path "~/.emacs.d/themes/")
+;;(add-to-list 'custom-theme-load-path "~/.emacs.d/themes/")
+(add-to-list 'custom-theme-load-path (expand-file-name "themes" user-emacs-directory))
 
 ;; Enable / disable some visual stuff
 (global-display-line-numbers-mode)
@@ -47,6 +48,7 @@
 (global-hl-line-mode t)
 (line-number-mode 1)
 (column-number-mode 1)
+;;(size-indication-mode 1)
 (setq ring-bell-function 'ignore)
 (setq inhibit-startup-screen t)
 (setq-default fill-column 80)
@@ -78,6 +80,7 @@
       '((:eval (if (buffer-file-name)
                    (concat (abbreviate-file-name (buffer-file-name)) " — Emacs")
                  "%b — Emacs"))))
+(setq icon-title-format frame-title-format)
 
 ;; Set browser
 (setq browse-url-browser-function 'browse-url-chrome)
@@ -127,19 +130,39 @@
 ;; ----------------------------------------------------------------------------
 ;; Packages configs
 ;; ----------------------------------------------------------------------------
+(use-package all-the-icons
+  :ensure t
+  :config
+  (unless (file-exists-p (expand-file-name "~/.local/share/fonts/all-the-icons.ttf"))
+    (all-the-icons-install-fonts)))
+
+;; (use-package all-the-icons-dired
+;;   :ensure t
+;;   :hook ((dired-mode . all-the-icons-dired-mode)))
+
+;; (use-package all-the-icons-ivy
+;;   :ensure t
+;;   :after (all-the-icons ivy)
+;;   ;;:custom (all-the-icons-ivy-buffer-commands '(ivy-switch-buffer-other-window))
+;;   :config
+;;   (add-to-list 'all-the-icons-ivy-file-commands 'counsel-find-file)
+;;   (add-to-list 'all-the-icons-ivy-file-commands 'counsel-file-jump)
+;;   (add-to-list 'all-the-icons-ivy-file-commands 'counsel-recentf)
+;;   (add-to-list 'all-the-icons-ivy-file-commands 'counsel-projectile-find-file)
+;;   (add-to-list 'all-the-icons-ivy-file-commands 'counsel-projectile-find-dir)
+;;   (all-the-icons-ivy-setup))
 
 (use-package doom-themes
   :ensure t
   :config
   ;; Global settings (defaults)
-  (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
-        doom-themes-enable-italic t) ; if nil, italics is universally disabled
+  (setq doom-themes-enable-bold t
+        doom-themes-enable-italic t
+        doom-themes-padded-modeline 1)
   (setq doom-dark+-blue-modeline 1)
   (load-theme 'doom-dark+ t)
-
   ;; Enable flashing mode-line on errors
   (doom-themes-visual-bell-config)
-
   ;; Corrects (and improves) org-mode's native fontification.
   (doom-themes-org-config))
 
@@ -179,7 +202,8 @@
 
 (use-package saveplace
   :config
-  (setq-default save-place t))
+  (setq-default save-place t)
+  (setq save-place-file (expand-file-name ".places" user-emacs-directory)))
 
 (use-package uniquify
   :config
@@ -190,22 +214,40 @@
   ;; don't muck with special buffers
   (setq uniquify-ignore-buffers-re "^\\*"))
 
+(use-package smex
+  :ensure t)
+
 (use-package windmove
   :config
   (windmove-default-keybindings 'meta))
 
-;; (use-package avy
-;;   :ensure t
-;;   :defer t
-;;   :bind (("s-," . avy-goto-word-or-subword-1)
-;;          ("M-s-," . avy-goto-char))
-;;   :config
-;;   (setq avy-background t))
+(use-package vdiff
+  :ensure t
+  :config (define-key vdiff-mode-map (kbd "C-c") vdiff-mode-prefix-map))
 
 (use-package magit
   :ensure t
   :defer t
   :bind (("C-x g" . magit-status)))
+
+(use-package vdiff-magit
+  :ensure t
+  :bind (:map magit-mode-map
+              ("e" . vdiff-magit-dwim)
+              ("E" . vdiff-magit))
+  :config
+  (transient-suffix-put 'magit-dispatch "e" :description "vdiff (dwim)")
+  (transient-suffix-put 'magit-dispatch "e" :command 'vdiff-magit-dwim)
+  (transient-suffix-put 'magit-dispatch "E" :description "vdiff")
+  (transient-suffix-put 'magit-dispatch "E" :command 'vdiff-magit))
+
+(use-package gitconfig-mode
+  :ensure t
+  :defer t)
+
+(use-package gitignore-mode
+  :ensure t
+  :defer t)
 
 (use-package expand-region
   :ensure t
@@ -256,29 +298,23 @@
   (global-set-key (kbd "C-c j") 'counsel-git-grep)
   (global-set-key (kbd "C-c a") 'counsel-ag)
   (global-set-key (kbd "C-x l") 'counsel-locate)
-  (define-key minibuffer-local-map (kbd "C-r") 'counsel-minibuffer-history)
+  (define-key minibuffer-local-map (kbd "C-r") 'counsel-minibuffer-history))
 
-  (use-package counsel-projectile
-    :ensure t
-    :hook (counsel-mode . counsel-projectile-mode)
-    :init (setq counsel-projectile-grep-initial-input '(ivy-thing-at-point)))
+(use-package counsel-projectile
+  :ensure t
+  :after (counsel)
+  :hook (counsel-mode . counsel-projectile-mode)
+  :init (setq counsel-projectile-grep-initial-input '(ivy-thing-at-point)))
 
-  (use-package counsel-tramp
-    :ensure t
-    :init
-    (setq tramp-default-method "ssh")
-    :config
-    (define-key global-map (kbd "C-x C-l") 'counsel-tramp)
-    (add-hook 'counsel-tramp-pre-command-hook '(lambda () (projectile-mode 0)))
-    (add-hook 'counsel-tramp-quit-hook '(lambda () (projectile-mode 1))))
-)
-
-;; (use-package all-the-icons-ivy
-;;   :ensure t
-;;   :init
-;;   (add-hook 'after-init-hook 'all-the-icons-ivy-setup)
-;;   (setq all-the-icons-ivy-file-commands
-;;       '(counsel-find-file counsel-file-jump counsel-recentf counsel-projectile-find-file counsel-projectile-find-dir)))
+(use-package counsel-tramp
+  :ensure t
+  :after (counsel)
+  :init
+  (setq tramp-default-method "ssh")
+  :config
+  (define-key global-map (kbd "C-x C-l") 'counsel-tramp)
+  (add-hook 'counsel-tramp-pre-command-hook '(lambda () (projectile-mode 0)))
+  (add-hook 'counsel-tramp-quit-hook '(lambda () (projectile-mode 1))))
 
 (use-package projectile
   :ensure t
@@ -386,5 +422,5 @@
 ;; ----------------------------------------------------------------------------
 ;; Custom set variables file definition and loading
 ;; ----------------------------------------------------------------------------
-(setq custom-file "~/.emacs.d/custom.el")
+(setq custom-file (expand-file-name "custom.el" user-emacs-directory))
 (load custom-file)
