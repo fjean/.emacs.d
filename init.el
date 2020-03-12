@@ -36,7 +36,6 @@
       scroll-preserve-screen-position 1)
 
 ;; Custom theme folder
-;;(add-to-list 'custom-theme-load-path "~/.emacs.d/themes/")
 (add-to-list 'custom-theme-load-path (expand-file-name "themes" user-emacs-directory))
 
 ;; Enable / disable some visual stuff
@@ -196,6 +195,15 @@
       (quote (("default"
                ("dired" (mode . dired-mode)))))))
 
+(use-package ibuffer-projectile
+  :ensure t
+  :init
+  (add-hook 'ibuffer-hook
+    (lambda ()
+      (ibuffer-projectile-set-filter-groups)
+      (unless (eq ibuffer-sorting-mode 'alphabetic)
+        (ibuffer-do-sort-by-alphabetic)))))
+
 (use-package paren
   :config
   (show-paren-mode +1))
@@ -270,12 +278,12 @@
 (use-package ivy
   :ensure t
   :config
-  (ivy-mode 1)
   (setq ivy-use-virtual-buffers t)
   (setq enable-recursive-minibuffers t)
   (setq ivy-count-format "(%d/%d) ")
   (setq ivy-initial-inputs-alist nil)
-  (global-set-key (kbd "<f6>") 'ivy-resume))
+  (global-set-key (kbd "<f6>") 'ivy-resume)
+  (ivy-mode 1))
 
 (use-package swiper
   :ensure t
@@ -321,7 +329,7 @@
   :init
   (setq projectile-completion-system 'ivy)
   :config
-  (define-key projectile-mode-map (kbd "C-x p") 'projectile-command-map)
+  (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map)
   (projectile-mode +1))
 
 (use-package move-text
