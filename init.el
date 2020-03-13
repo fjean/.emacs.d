@@ -77,7 +77,7 @@
 ;; buffer name (if the buffer isn't visiting a file)
 (setq frame-title-format
       '((:eval (if (buffer-file-name)
-                   (concat (abbreviate-file-name (buffer-file-name)) " — Emacs")
+                   (concat (file-name-nondirectory (buffer-file-name)) " — Emacs")
                  "%b — Emacs"))))
 (setq icon-title-format frame-title-format)
 
@@ -209,6 +209,8 @@
   (show-paren-mode +1))
 
 (use-package saveplace
+  :init
+  (save-place-mode 1)
   :config
   (setq-default save-place t)
   (setq save-place-file (expand-file-name ".places" user-emacs-directory)))
@@ -231,7 +233,10 @@
 
 (use-package vdiff
   :ensure t
-  :config (define-key vdiff-mode-map (kbd "C-c") vdiff-mode-prefix-map))
+  :defer t
+  :config
+  (define-key vdiff-mode-map (kbd "C-c") vdiff-mode-prefix-map)
+  (setq vdiff-auto-refine t))
 
 (use-package magit
   :ensure t
