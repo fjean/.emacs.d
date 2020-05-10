@@ -23,27 +23,30 @@
 ;; Inhibit X ressources
 (setq inhibit-x-resources 't)
 
-;; reduce the frequency of garbage collection by making it happen on
-;; each 50MB of allocated data (the default is on every 0.76MB)
-(setq gc-cons-threshold 50000000)
+;; Reduce garbage collection at start, restore after started
+(setq gc-cons-threshold most-positive-fixnum)
+(setq gc-cons-percentage 0.6)
+(add-hook 'emacs-startup-hook
+          (lambda ()
+            (setq gc-cons-threshold 16777216)
+            (setq gc-cons-percentage 0.1)))
 
 ;; warn when opening files bigger than 100MB
 (setq large-file-warning-threshold 100000000)
 
 ;; nice scrolling
 (setq scroll-margin 0
-      scroll-conservatively 100000
+      scroll-conservatively 0
       scroll-preserve-screen-position 1)
 
 ;; Custom theme folder
 (add-to-list 'custom-theme-load-path (expand-file-name "themes" user-emacs-directory))
 
 ;; Enable / disable some visual stuff
-(global-display-line-numbers-mode)
 (menu-bar-mode -1)
 (toggle-scroll-bar -1)
 (tool-bar-mode -1)
-(blink-cursor-mode -1)
+(blink-cursor-mode t)
 (global-hl-line-mode t)
 (line-number-mode 1)
 (column-number-mode 1)
@@ -52,8 +55,12 @@
 (setq inhibit-startup-screen t)
 (setq-default fill-column 80)
 (setq initial-major-mode 'fundamental-mode)
-(setq initial-scratch-message "-------------------------------- Scratch buffer --------------------------------\n")
+(setq initial-scratch-message "" )
+(setq echo-keystrokes 0.1)
+(setq-default cursor-type 'bar)
 (add-hook 'server-switch-hook #'raise-frame)
+(add-hook 'prog-mode-hook #'display-line-numbers-mode)
+(add-hook 'text-mode-hook #'display-line-numbers-mode)
 
 ;; Delete move files to trash
 (setq delete-by-moving-to-trash t)
@@ -62,7 +69,7 @@
 (add-to-list 'default-frame-alist '(height . 50))
 (add-to-list 'default-frame-alist '(width . 140))
 (add-to-list 'default-frame-alist '(vertical-scroll-bars . nil))
-(add-to-list 'default-frame-alist '(font . "Ubuntu Mono-14:style=Regular"))
+(add-to-list 'default-frame-alist '(font . "SourceCodePro Medium-13"))
 
 ;; Resize windows
 (global-set-key (kbd "C-s-<left>") 'shrink-window-horizontally)
@@ -84,20 +91,20 @@
 ;; Set browser
 (setq browse-url-browser-function 'browse-url-chrome)
 
-;; Change backup folders
-(setq backup-directory-alist
-      `((".*" . ,temporary-file-directory)))
-(setq auto-save-file-name-transforms
-      `((".*" ,temporary-file-directory t)))
+;; Backup files options
+(setq make-backup-files nil)
+(setq auto-save-default nil)
+(setq auto-save-list-file-prefix nil)
+(setq create-lockfiles nil)
 
 ;; Tab settings
 (setq-default tab-width 4)
 (setq-default indent-tabs-mode nil)
 
-;; delete the selection with a keypress
+;; Delete the selection with a keypress
 (delete-selection-mode t)
 
-;; revert buffers automatically when underlying files are changed externally
+;; Revert buffers automatically when underlying files are changed externally
 (global-auto-revert-mode t)
 
 ;; UTF8
@@ -109,7 +116,7 @@
 ;; Remove trailing space when saving
 (add-hook 'before-save-hook 'delete-trailing-whitespace)
 
-;; smart tab behavior - indent or complete
+;; Smart tab behavior - indent or complete
 (setq tab-always-indent 'complete)
 
 ;; Unset global keys
@@ -119,12 +126,17 @@
 (global-set-key (kbd "C-M-;") 'comment-dwim)
 (global-set-key (kbd "M-<") 'delete-horizontal-space)
 (global-set-key (kbd "C-é") 'undo)
+(global-set-key [C-tab] 'other-window)
 
 ;; make sure use-package is installed
 (unless (package-installed-p 'use-package)
   (package-install 'use-package))
 (require 'use-package)
 (setq use-package-verbose t)
+
+;; Clipboard settings
+(setq x-select-enable-clipboard t
+      x-select-enable-primary t)
 
 ;; ----------------------------------------------------------------------------
 ;; Packages configs
@@ -135,21 +147,21 @@
   (unless (file-exists-p (expand-file-name "~/.local/share/fonts/all-the-icons.ttf"))
     (all-the-icons-install-fonts)))
 
-;; (use-package all-the-icons-dired
-;;   :ensure t
-;;   :hook ((dired-mode . all-the-icons-dired-mode)))
+(use-package all-the-icons-dired
+  :ensure t
+  :hook ((dired-mode . all-the-icons-dired-mode)))
 
-;; (use-package all-the-icons-ivy
-;;   :ensure t
-;;   :after (all-the-icons ivy)
-;;   ;;:custom (all-the-icons-ivy-buffer-commands '(ivy-switch-buffer-other-window))
-;;   :config
-;;   (add-to-list 'all-the-icons-ivy-file-commands 'counsel-find-file)
-;;   (add-to-list 'all-the-icons-ivy-file-commands 'counsel-file-jump)
-;;   (add-to-list 'all-the-icons-ivy-file-commands 'counsel-recentf)
-;;   (add-to-list 'all-the-icons-ivy-file-commands 'counsel-projectile-find-file)
-;;   (add-to-list 'all-the-icons-ivy-file-commands 'counsel-projectile-find-dir)
-;;   (all-the-icons-ivy-setup))
+(use-package all-the-icons-ivy
+  :ensure t
+  :after (all-the-icons ivy)
+  ;;:custom (all-the-icons-ivy-buffer-commands '(ivy-switch-buffer-other-window))
+  :config
+  (add-to-list 'all-the-icons-ivy-file-commands 'counsel-find-file)
+  (add-to-list 'all-the-icons-ivy-file-commands 'counsel-file-jump)
+  (add-to-list 'all-the-icons-ivy-file-commands 'counsel-recentf)
+  (add-to-list 'all-the-icons-ivy-file-commands 'counsel-projectile-find-file)
+  (add-to-list 'all-the-icons-ivy-file-commands 'counsel-projectile-find-dir)
+  (all-the-icons-ivy-setup))
 
 (use-package doom-themes
   :ensure t
@@ -168,12 +180,40 @@
 (use-package doom-modeline
   :ensure t
   :init
-  (setq doom-modeline-height 25)
+  (setq doom-modeline-height 1)
   (setq doom-modeline-bar-width 3)
   (setq doom-modeline-buffer-file-name-style 'truncate-with-project)
   (setq doom-modeline-icon t)
+  (setq doom-modeline-project-detection 'projectile)
+  (setq doom-modeline-major-mode-icon t)
+  (setq doom-modeline-major-mode-color-icon t)
+  (setq doom-modeline-buffer-encoding nil)
+  (setq doom-modeline-vcs-max-length 20)
+  (setq find-file-visit-truename t)
+  (setq inhibit-compacting-font-caches t)
+    :config
+  (set-face-attribute 'mode-line-inactive nil :box '(:line-width 1))
   :hook
   (after-init . doom-modeline-mode))
+
+;; (use-package page-break-lines
+;;   :ensure t
+;;   :config
+;;   (turn-on-page-break-lines-mode))
+
+(use-package dashboard
+  :ensure t
+  :init
+  (setq initial-buffer-choice (lambda () (get-buffer "*dashboard*")))
+  (add-hook 'after-init-hook 'dashboard-refresh-buffer)
+  :config
+  (setq dashboard-banner-logo-title "")
+  (setq dashboard-startup-banner 'logo)
+  (setq dashboard-set-heading-icons t)
+  (setq dashboard-set-file-icons t)
+  (setq dashboard-set-footer nil)
+  (setq dashboard-items '((recents  . 10) (projects . 5)))
+  (dashboard-setup-startup-hook))
 
 (use-package dired
   :init
@@ -191,6 +231,8 @@
 (use-package ibuffer
   :bind ("C-x C-b" . ibuffer)
   :init
+  (add-hook 'ibuffer-mode-hook (lambda () (ibuffer-auto-mode 1)))
+  (setq ibuffer-show-empty-filter-groups nil)
   (setq ibuffer-saved-filter-groups
       (quote (("default"
                ("dired" (mode . dired-mode)))))))
@@ -203,6 +245,9 @@
       (ibuffer-projectile-set-filter-groups)
       (unless (eq ibuffer-sorting-mode 'alphabetic)
         (ibuffer-do-sort-by-alphabetic)))))
+
+(use-package iedit
+  :ensure t)
 
 (use-package paren
   :config
@@ -231,6 +276,20 @@
   :config
   (windmove-default-keybindings 'meta))
 
+(use-package winner
+  :init
+  (winner-mode))
+
+(use-package cua-base
+  :init
+  (cua-mode 1))
+
+(use-package undo-tree
+  :ensure t
+  :init
+  (global-undo-tree-mode)
+  (global-set-key (kbd "C-S-z") 'undo-tree-redo))
+
 (use-package vdiff
   :ensure t
   :defer t
@@ -241,7 +300,9 @@
 (use-package magit
   :ensure t
   :defer t
-  :bind (("C-x g" . magit-status)))
+  :bind (("C-x g" . magit-status))
+  :init
+  (setq auto-revert-check-vc-info t))
 
 (use-package vdiff-magit
   :ensure t
@@ -278,28 +339,40 @@
   ;; invert the navigation direction if the the completion popup-isearch-match
   ;; is displayed on top (happens near the bottom of windows)
   (setq company-tooltip-flip-when-above t)
+  (add-to-list 'company-backends '(company-files))
   (global-company-mode))
+
+(use-package ag
+  :ensure t)
 
 (use-package ivy
   :ensure t
   :config
   (setq ivy-use-virtual-buffers t)
+  (setq ivy-use-selectable-prompt t)
   (setq enable-recursive-minibuffers t)
   (setq ivy-count-format "(%d/%d) ")
-  (setq ivy-initial-inputs-alist nil)
-  (global-set-key (kbd "<f6>") 'ivy-resume)
+  (setq ivy-truncate-lines nil)
+  (global-set-key (kbd "C-r") 'ivy-resume)
   (ivy-mode 1))
+
+(use-package ivy-xref
+  :ensure t
+  :init
+  (when (>= emacs-major-version 27)
+    (setq xref-show-definitions-function #'ivy-xref-show-defs))
+  (setq xref-show-xrefs-function #'ivy-xref-show-xrefs))
 
 (use-package swiper
   :ensure t
   :config
   (global-set-key (kbd "C-s") 'swiper-isearch)
-  (global-set-key (kbd "C-r") 'swiper-isearch-backward)
-  (global-set-key (kbd "C-S-s") 'swiper-all))
+  (global-set-key (kbd "C-S-s") 'swiper-isearch-thing-at-point))
 
 (use-package counsel
   :ensure t
   :config
+  (setq ivy-initial-inputs-alist nil)
   (global-set-key (kbd "M-x") 'counsel-M-x)
   (global-set-key (kbd "C-x C-f") 'counsel-find-file)
   (global-set-key (kbd "<f1> f") 'counsel-describe-function)
@@ -307,17 +380,15 @@
   (global-set-key (kbd "<f1> l") 'counsel-find-library)
   (global-set-key (kbd "<f2> i") 'counsel-info-lookup-symbol)
   (global-set-key (kbd "<f2> u") 'counsel-unicode-char)
-  (global-set-key (kbd "C-c g") 'counsel-git)
-  (global-set-key (kbd "C-c j") 'counsel-git-grep)
-  (global-set-key (kbd "C-c a") 'counsel-ag)
-  (global-set-key (kbd "C-x l") 'counsel-locate)
+  (global-set-key (kbd "C-S-a") 'counsel-projectile-ag)
+  (global-set-key (kbd "M-i") 'counsel-imenu)
   (define-key minibuffer-local-map (kbd "C-r") 'counsel-minibuffer-history))
 
 (use-package counsel-projectile
   :ensure t
-  :after (counsel)
-  :hook (counsel-mode . counsel-projectile-mode)
-  :init (setq counsel-projectile-grep-initial-input '(ivy-thing-at-point)))
+  :after (counsel projectile)
+  :init
+  (counsel-projectile-mode))
 
 (use-package counsel-tramp
   :ensure t
@@ -333,9 +404,10 @@
   :ensure t
   :init
   (setq projectile-completion-system 'ivy)
+  (setq projectile-find-dir-include-top-level t)
   :config
   (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map)
-  (projectile-mode +1))
+  (projectile-global-mode +1))
 
 (use-package move-text
   :ensure t
@@ -351,34 +423,45 @@
   (add-hook 'python-mode-hook 'company-mode)
   (add-hook 'python-mode-hook 'anaconda-mode)
   (add-hook 'python-mode-hook 'anaconda-eldoc-mode)
-  (add-hook 'python-mode-hook 'sphinx-doc-mode)
   (setq warning-suppress-types '((python)
-                                 (emacs)))
+                                 (emacs))))
 
-  (use-package sphinx-doc
-    :ensure t)
+(use-package python-pytest
+  :ensure t
+  :bind (("C-c t" . python-pytest-popup))
+  :custom
+  (python-pytest-confirm nil))
 
-  (use-package anaconda-mode
-    :ensure t
-    :bind ("C-c C-d" . anaconda-mode-show-doc))
+(use-package anaconda-mode
+  :ensure t
+  :bind ("C-c C-d" . anaconda-mode-show-doc))
 
-  (use-package company-anaconda
-    :ensure t
-    :config
-    (require 'rx)
-    :init
-    (eval-after-load "company"
-      '(add-to-list 'company-backends '(company-anaconda))))
-)
+(use-package company-anaconda
+  :ensure t
+  :config
+  (require 'rx)
+  :init
+  (eval-after-load "company"
+    '(add-to-list 'company-backends '(company-anaconda))))
+
+(use-package python-docstring
+  :ensure t
+  :hook ((python-mode . python-docstring-mode)))
 
 (use-package conda
   :ensure t
-  :defer t
   :config
   (setq conda-anaconda-home (expand-file-name "~/.local/miniconda3"))
   (setq conda-env-home-directory (expand-file-name "~/.local/miniconda3"))
+  (conda-env-autoactivate-mode t)
   (conda-env-initialize-interactive-shells)
   (conda-env-initialize-eshell))
+
+(use-package realgud
+  :ensure t
+  :commands (realgud:gdb
+             realgud:ipdb
+             realgud:pdb))
 
 (use-package json-mode
   :ensure t
@@ -419,8 +502,7 @@
   (setq vterm-kill-buffer-on-exit t)
   (add-hook 'vterm-mode-hook
             (lambda ()
-              (display-line-numbers-mode -1)
-              (setq-local global-hl-line-mode nil))) )
+              (setq-local global-hl-line-mode nil))))
 
 (use-package pdf-tools
   :pin manual
@@ -436,4 +518,6 @@
 ;; Custom set variables file definition and loading
 ;; ----------------------------------------------------------------------------
 (setq custom-file (expand-file-name "custom.el" user-emacs-directory))
+(unless (file-exists-p custom-file)
+  (write-region "" nil custom-file))
 (load custom-file)
