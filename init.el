@@ -198,8 +198,8 @@
 (use-package doom-modeline
   :ensure t
   :init
-  (setq doom-modeline-height 1)
-  (setq doom-modeline-bar-width 3)
+  (setq doom-modeline-height 35)
+  (setq doom-modeline-bar-width 0)
   (setq doom-modeline-buffer-file-name-style 'truncate-with-project)
   (setq doom-modeline-icon t)
   (setq doom-modeline-project-detection 'projectile)
