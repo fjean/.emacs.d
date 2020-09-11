@@ -131,6 +131,7 @@
 (global-set-key (kbd "M-<down>") 'end-of-defun)
 (global-set-key (kbd "M-<left>") 'previous-buffer)
 (global-set-key (kbd "M-<right>") 'next-buffer)
+(global-set-key (kbd "M-<return>") 'browse-url-at-point)
 
 ;; make sure use-package is installed
 (unless (package-installed-p 'use-package)
@@ -143,9 +144,22 @@
       select-enable-primary nil)
 ;;(setq mouse-drag-copy-region t)
 
+;; Set some options to speed up Tramp
+(setq remote-file-name-inhibit-cache nil)
+(setq vc-ignore-dir-regexp
+      (format "%s\\|%s"
+              vc-ignore-dir-regexp
+              tramp-file-name-regexp))
+
 ;; ----------------------------------------------------------------------------
 ;; Packages configs
 ;; ----------------------------------------------------------------------------
+(use-package exec-path-from-shell
+  :ensure t
+  :config
+  (setq exec-path-from-shell-variables '("PATH"))
+  (exec-path-from-shell-initialize))
+
 (use-package all-the-icons
   :ensure t
   :config
@@ -199,7 +213,7 @@
   :ensure t
   :init
   (setq doom-modeline-height 35)
-  (setq doom-modeline-bar-width 0)
+  (setq doom-modeline-bar-width 1)
   (setq doom-modeline-buffer-file-name-style 'truncate-with-project)
   (setq doom-modeline-icon t)
   (setq doom-modeline-project-detection 'projectile)
@@ -458,6 +472,16 @@
   (setq projectile-completion-system 'ivy)
   (setq projectile-find-dir-include-top-level t)
   :config
+  (defadvice projectile-on (around exlude-tramp activate)
+    "This should disable projectile when visiting a remote file"
+    (unless  (--any? (and it (file-remote-p it))
+                     (list
+                      (buffer-file-name)
+                      list-buffers-directory
+                      default-directory
+                      dired-directory))
+      ad-do-it))
+  (setq projectile-mode-line "Projectile")
   (define-key projectile-mode-map (kbd "C-p") 'projectile-command-map)
   (projectile-global-mode +1))
 
@@ -599,7 +623,7 @@
   :commands (enfine/wikipedia engine/search-google)
   :config
   (engine-mode t)
-  (engine/set-keymap-prefix (kbd "C-x /"))
+  (engine/set-keymap-prefix (kbd "C-<return>"))
   (defengine wikipedia
     "http://www.wikipedia.org/search-redirect.php?language=en&go=Go&search=%s"
     :keybinding "w")
