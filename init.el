@@ -72,6 +72,7 @@
 (global-so-long-mode)
 (setq window-divider-default-right-width 3)
 (window-divider-mode 1)
+(setq frame-resize-pixelwise t)
 
 ;; Set focus of new client frame
 (defun focus-new-client-frame ()
@@ -492,9 +493,8 @@
 (use-package ivy-xref
   :ensure t
   :init
-  (when (>= emacs-major-version 27)
-    (setq xref-show-definitions-function #'ivy-xref-show-defs))
-  (setq xref-show-xrefs-function #'ivy-xref-show-xrefs))
+  (setq xref-show-definitions-function #'ivy-xref-show-defs)
+  (global-set-key (kbd "C-M-.") #'xref-find-definitions-other-window))
 
 ;; (use-package prescient
 ;;   :ensure t)
@@ -941,7 +941,12 @@
   :ensure t
   :defer t
   :after lsp-mode
+  :bind ("C-c d" . dap-debug)
+  :hook (dap-stopped . (lambda (arg) (call-interactively #'dap-hydra)))
   :config
+  (setq dap-python-debugger 'debugpy)
+  (setq dap-auto-configure-features '(locals controls tooltip))
+  (require 'dap-python)
   (dap-auto-configure-mode))
 
 (use-package pyvenv
