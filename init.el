@@ -30,6 +30,12 @@
             (setq gc-cons-threshold 100000000)
             (setq gc-cons-percentage 0.1)))
 
+;; Don't show warning from native comp
+(setq native-comp-async-report-warnings-errors nil)
+
+;; Only show errors
+(setq warning-minimum-level :error)
+
 ;; Amount of data read from process (1Mb)
 (setq read-process-output-max (* 1024 1024))
 
@@ -311,7 +317,7 @@
 
 (use-package uniquify
   :config
-  (setq uniquify-buffer-name-style 'post-forward-angle-brackets)
+  (setq uniquify-buffer-name-style 'forward)
   (setq uniquify-separator "/")
   ;; rename after killing uniquified
   (setq uniquify-after-kill-buffer-p t)
@@ -333,6 +339,14 @@
   :ensure t
   :config
   (google-this-mode 1))
+
+;; (use-package beacon
+;;   :ensure t
+;;   :hook ((prog-mode text-mode lisp-mode) . beacon-mode)
+;;   :custom
+;;   (beacon-blink-when-point-moves-vertically 5)
+;;   (beacon-size 50)
+;;   (beacon-blink-delay 0.5))
 
 ;; ----------------------------------------------------------------------------
 ;; Editing packages configs
@@ -421,7 +435,7 @@
   :init
   (setq doom-modeline-height 35)
   (setq doom-modeline-bar-width 4)
-  (setq doom-modeline-buffer-file-name-style 'file-name)
+  (setq doom-modeline-buffer-file-name-style 'auto)
   (setq doom-modeline-icon (display-graphic-p))
   (setq doom-modeline-project-detection 'projectile)
   (setq doom-modeline-major-mode-icon t)
@@ -435,7 +449,6 @@
   ;;(set-face-attribute 'mode-line nil :box '(:line-width 1))
   :hook
   (after-init . doom-modeline-mode))
-
 
 ;; ----------------------------------------------------------------------------
 ;; Dashboard packages configs
@@ -701,11 +714,13 @@
 
 (use-package company
   :ensure t
+  :bind (:map company-active-map
+              ("<tab>" . company-complete-selection))
   :config
   (setq company-idle-delay 0.1)
   (setq company-show-numbers t)
   (setq company-tooltip-limit 10)
-  (setq company-minimum-prefix-length 2)
+  (setq company-minimum-prefix-length 1)
   (setq company-tooltip-align-annotations t)
   (setq company-tooltip-flip-when-above nil)
   (add-to-list 'company-backends '(company-files))
@@ -842,10 +857,13 @@
 (use-package markdown-mode
   :ensure t
   :commands (markdown-mode gfm-mode)
+  :bind (:map markdown-mode-map
+         ("M-p" . nil))
   :mode (("README\\.md\\'" . gfm-mode)
          ("\\.md\\'" . markdown-mode)
          ("\\.markdown\\'" . markdown-mode))
   :init (setq markdown-command "multimarkdown"))
+
 
 ;; ----------------------------------------------------------------------------
 ;; CMake
@@ -862,9 +880,17 @@
 ;; Python
 ;; ----------------------------------------------------------------------------
 
+(use-package numpydoc
+  :ensure t
+  :init
+  (setq numpydoc-insertion-style nil)
+  (setq numpydoc-insert-examples-block nil))
+
 (use-package python
   :ensure nil
   :hook (python-mode . (lambda () (setq indent-tabs-mode t python-indent-offset 4)))
+  :bind (:map python-mode-map
+              ("C-c C-n" . numpydoc-generate))
   :config
   (setq python-indent-guess-indent-offset-verbose t))
 
@@ -891,14 +917,6 @@
          ("\\.spyx\\'" . cython-mode)
          ("\\.pxd\\'"  . cython-mode)
          ("\\.pxi\\'"  . cython-mode)))
-
-(use-package numpydoc
-  :ensure t
-  :bind (:map python-mode-map
-              ("C-c C-n" . numpydoc-generate))
-  :init
-  (setq numpydoc-insertion-style nil)
-  (setq numpydoc-insert-examples-block nil))
 
 ;; ----------------------------------------------------------------------------
 ;; C/C++
@@ -1011,6 +1029,8 @@
   :defer t
   :bind (("C-c b" . compile)
          ("M-r" . lsp-find-references))
+         ;; (:map lsp-mode-map
+         ;;       ("<tab>" . company-indent-or-complete-common)))
   :hook ((lsp-mode . (lambda ()
                       (let ((lsp-keymap-prefix "C-c l"))
                         (lsp-enable-which-key-integration))))
@@ -1048,6 +1068,9 @@
   :bind (:map lsp-ui-mode-map
 	          ("C-c i" . lsp-ui-imenu)
               ("M-<return>" . lsp-describe-thing-at-point)))
+
+(use-package lsp-treemacs
+  :ensure t)
 
 (use-package dap-mode
   :ensure t
