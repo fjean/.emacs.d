@@ -139,6 +139,7 @@
 ;; Set some mode options
 (add-hook 'prog-mode-hook #'display-line-numbers-mode)
 (add-hook 'text-mode-hook #'display-line-numbers-mode)
+(add-hook 'conf-mode-hook #'display-line-numbers-mode)
 (global-so-long-mode)
 
 (setq initial-major-mode 'fundamental-mode)
@@ -324,12 +325,12 @@
   ;; don't muck with special buffers
   (setq uniquify-ignore-buffers-re "^\\*"))
 
-(use-package which-func
-  :init
-  (which-function-mode 1)
-  :config
-  (setq which-func-unknown "∅")
-  (set-face-attribute 'which-func nil :foreground "white"))
+;; (use-package which-func
+;;   :init
+;;   (which-function-mode 1)
+;;   :config
+;;   (setq which-func-unknown "∅")
+;;   (set-face-attribute 'which-func nil :foreground "white"))
 
 (use-package savehist
   :init
@@ -484,6 +485,9 @@
 
 (use-package dired-single
   :ensure t
+  :bind (([remap dired-find-file] . dired-single-buffer)
+         ([remap dired-mouse-find-file-other-window] . dired-single-buffer-mouse)
+         ([remap dired-up-directory] . dired-single-up-directory))
   :commands (dired dired-jump))
 
 (use-package dired-hide-dotfiles
@@ -654,6 +658,8 @@
          ("C-x 5 b" . consult-buffer-other-frame)
          ("M-y" . consult-yank-pop)
          ("M-i" . consult-imenu)
+         ("M-I" . consult-imenu-multi)
+         ("C-x C-r" . consult-recent-file)
 
          ("C-x p b" . consult-project-buffer)      ;; orig. project-switch-to-buffer
 
