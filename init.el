@@ -721,8 +721,6 @@
 
 (use-package company
   :ensure t
-  :bind (:map company-active-map
-              ("<tab>" . company-complete-selection))
   :config
   (setq company-idle-delay 0.1)
   (setq company-show-numbers t)
