@@ -85,7 +85,6 @@
 
 ;; UI options
 (setq-default cursor-type 'bar)
-(setq-default fill-column 80)
 (set-fringe-mode '(12 . 12))
 (setq window-divider-default-right-width 3)
 (window-divider-mode 1)
@@ -164,6 +163,9 @@
 (setq auto-save-default nil)
 (setq auto-save-list-file-prefix nil)
 (setq create-lockfiles nil)
+
+;; Default fill number of columns
+(setq-default fill-column 79)
 
 ;; Tab settings
 (setq-default tab-width 4)
@@ -436,7 +438,7 @@
   :init
   (setq doom-modeline-height 35)
   (setq doom-modeline-bar-width 4)
-  (setq doom-modeline-buffer-file-name-style 'auto)
+  (setq doom-modeline-buffer-file-name-style 'buffer-name)
   (setq doom-modeline-icon (display-graphic-p))
   (setq doom-modeline-project-detection 'projectile)
   (setq doom-modeline-major-mode-icon t)
@@ -569,7 +571,6 @@
          ("M-<right>" . next-buffer)
          )
   :hook (vterm-mode . (lambda () (setq-local global-hl-line-mode nil)))
-
   :config
   (setq vterm-kill-buffer-on-exit t)
   (setq vterm-timer-delay 0.01)
@@ -786,7 +787,10 @@
   :init
   (setq auto-revert-check-vc-info t)
   (with-eval-after-load 'magit-status
-    (define-key magit-mode-map (kbd "C-<tab>") nil)))
+    (define-key magit-mode-map (kbd "C-<tab>") nil)
+    (define-key magit-mode-map (kbd "M-<down>") #'magit-section-forward-sibling)
+    (define-key magit-mode-map (kbd "M-<up>") #'magit-section-backward-sibling)
+    ))
 
 ;; ----------------------------------------------------------------------------
 ;; vdiff
@@ -848,21 +852,24 @@
   :ensure t)
 
 ;; ----------------------------------------------------------------------------
-;; Json, Yaml, Markdown
+;; Json, Yaml, Markdown, reStructuredText
 ;; ----------------------------------------------------------------------------
 
 (use-package json-mode
   :ensure t
+  :hook (json-mode . (lambda () (setq fill-column 100)))
   :mode ("\\.json\\'" . json-mode))
 
 (use-package yaml-mode
   :ensure t
+  :hook (yaml-mode . (lambda () (setq fill-column 100)))
   :mode (("\\.yaml\\'" . yaml-mode)
          ("\\.yml\\'" . yaml-mode)))
 
 (use-package markdown-mode
   :ensure t
   :commands (markdown-mode gfm-mode)
+  :hook (markdown-mode . (lambda () (setq fill-column 100)))
   :bind (:map markdown-mode-map
          ("M-p" . nil))
   :mode (("README\\.md\\'" . gfm-mode)
@@ -870,6 +877,10 @@
          ("\\.markdown\\'" . markdown-mode))
   :init (setq markdown-command "multimarkdown"))
 
+(use-package rst
+  :ensure nil
+  :hook (rst-mode . (lambda () (setq fill-column 100)))
+  :mode (("\\.rst\\'" . rst-mode)))
 
 ;; ----------------------------------------------------------------------------
 ;; CMake
@@ -894,7 +905,9 @@
 
 (use-package python
   :ensure nil
-  :hook (python-mode . (lambda () (setq indent-tabs-mode t python-indent-offset 4)))
+  :hook (python-mode . (lambda ()
+                         (setq fill-column 100
+                               python-indent-offset 4)))
   :bind (:map python-mode-map
               ("C-c C-n" . numpydoc-generate))
   :config
@@ -919,6 +932,7 @@
 
 (use-package cython-mode
   :ensure t
+  :hook (cython-mode . (lambda () (setq fill-column 100)))
   :mode (("\\.pyx\\'"  . cython-mode)
          ("\\.spyx\\'" . cython-mode)
          ("\\.pxd\\'"  . cython-mode)
@@ -930,12 +944,13 @@
 
 (use-package cc-vars
   :ensure nil
-  :hook (c-mode-common . (lambda () (setq indent-tabs-mode t)))
+  :hook (c-mode-common . (lambda ()
+                           (setq fill-column 79
+                                 c-basic-offset 4)))
   :config
   (setq c-default-style '((java-mode . "java")
                           (awk-mode  . "awk")
-                          (other     . "bsd")))
-  (setq-default c-basic-offset 4))
+                          (other     . "bsd"))))
 
 ;; ----------------------------------------------------------------------------
 ;; flycheck
