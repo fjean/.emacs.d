@@ -1041,6 +1041,10 @@
         ("C-<menu>" . treemacs-select-window)
         ("C-S-<menu>" . treemacs)))
 
+(use-package treemacs-projectile
+  :ensure t
+  :after projectile)
+
 ;; ----------------------------------------------------------------------------
 ;; LSP mode
 ;; ----------------------------------------------------------------------------
