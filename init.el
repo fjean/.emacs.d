@@ -693,6 +693,41 @@
   ;; (setq consult-project-function (lambda (_) (projectile-project-root)))
 )
 
+(use-package consult-projectile
+  :ensure t
+  :after projectile
+  :bind (([remap projectile-find-dir] . consult-projectile-find-dir)
+         ([remap projectile-find-file] . consult-projectile-find-file)
+         ([remap projectile-recentf] . consult-projectile-recentf)
+         ([remap projectile-switch-project] . consult-projectile-switch-project)
+         ([remap projectile-switch-to-buffer] . consult-projectile-switch-to-buffer))
+  :init
+  (define-key projectile-command-map (kbd "SPC") #'consult-projectile))
+
+;; ----------------------------------------------------------------------------
+;; embark
+;; ----------------------------------------------------------------------------
+
+(use-package embark
+  :ensure t
+  :bind (("C-." . embark-act)
+         ("C-," . embark-dwim)
+         ("C-h B" . embark-bindings))
+  :init
+  (setq prefix-help-command #'embark-prefix-help-command)
+  (setq embark-prompter #'embark-completing-read-prompter)
+  (setq embark-indicators '(embark-minimal-indicator))
+  :config
+  (add-to-list 'display-buffer-alist
+               '("\\`\\*Embark Collect \\(Live\\|Completions\\)\\*"
+                 nil
+                 (window-parameters (mode-line-format . none)))))
+
+(use-package embark-consult
+  :ensure t
+  :hook
+  (embark-collect-mode . consult-preview-at-point-mode))
+
 ;; ----------------------------------------------------------------------------
 ;; ag
 ;; ----------------------------------------------------------------------------
@@ -764,16 +799,6 @@
   ;;         (apply old-fn args)))
   ;; (advice-add 'projectile-project-root :around 'do-not-use-file-truename-in-projectile-project-root)
   (projectile-global-mode 1))
-
-(use-package consult-projectile
-  :ensure t
-  :bind (([remap projectile-find-dir] . consult-projectile-find-dir)
-         ([remap projectile-find-file] . consult-projectile-find-file)
-         ([remap projectile-recentf] . consult-projectile-recentf)
-         ([remap projectile-switch-project] . consult-projectile-switch-project)
-         ([remap projectile-switch-to-buffer] . consult-projectile-switch-to-buffer))
-  :init
-  (define-key projectile-command-map (kbd "SPC") #'consult-projectile))
 
 ;; ----------------------------------------------------------------------------
 ;; magit
