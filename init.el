@@ -519,6 +519,7 @@
   :bind ("C-x C-b" . ibuffer)
   :hook (ibuffer-mode . ibuffer-auto-mode)
   :config
+  (setq ibuffer-expert t)
   (setq ibuffer-show-empty-filter-groups nil)
   (setq ibuffer-saved-filter-groups (quote (("default" ("dired" (mode . dired-mode))))))
   ;; Use human readable Size column instead of original one
