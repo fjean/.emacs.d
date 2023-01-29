@@ -127,7 +127,6 @@
                  "%b — Emacs"))))
 (setq icon-title-format frame-title-format)
 
-
 ;; ----------------------------------------------------------------------------
 ;; Editor config
 ;; ----------------------------------------------------------------------------
@@ -171,6 +170,9 @@
 (setq-default tab-width 4)
 (setq-default indent-tabs-mode nil)
 
+;; No completions buffer
+(setq completion-auto-help nil)
+
 ;; Delete the selection with a keypress
 (delete-selection-mode t)
 
@@ -195,6 +197,9 @@
 ;; Smart tab behavior - indent or complete
 (setq tab-always-indent 'complete)
 
+;; Make underscore character part of words
+(modify-syntax-entry ?_ "w")
+
 ;; ----------------------------------------------------------------------------
 ;; General settings
 ;; ----------------------------------------------------------------------------
@@ -217,6 +222,10 @@
       (format "%s\\|%s"
               vc-ignore-dir-regexp
               tramp-file-name-regexp))
+
+;; Compilation options
+(setq compilation-read-command nil)
+(setq compilation-scroll-output t)
 
 ;; ----------------------------------------------------------------------------
 ;; Glocal shortcuts
@@ -623,21 +632,9 @@
 (use-package orderless
   :ensure t
   :custom
-  (completion-styles '(orderless))
-  (completion-category-defaults nil)    ; I want to be in control!
-  ;; (completion-category-overrides
-  ;;  '((file (styles basic-remote ; For `tramp' hostname completion with `vertico'
-  ;;                  orderless
-  ;;                  ))
-  ;;    ))
-  (orderless-component-separator 'orderless-escapable-split-on-space)
-  ;; (orderless-matching-styles
-  ;;  '(orderless-literal
-  ;;    orderless-prefixes
-  ;;    orderless-initialism
-  ;;    orderless-regexp
-  ;;    ))
-  )
+  (completion-styles '(orderless basic))
+  (completion-category-overrides '((file (styles basic partial-completion))))
+  (orderless-component-separator 'orderless-escapable-split-on-space))
 
 ;; (use-package prescient
 ;;   :ensure t)
@@ -756,6 +753,8 @@
 
 (use-package company
   :ensure t
+  :bind (:map company-active-map
+              ("<tab>" . company-complete-selection))
   :config
   (setq company-idle-delay 0.1)
   (setq company-show-numbers t)
@@ -763,12 +762,14 @@
   (setq company-minimum-prefix-length 1)
   (setq company-tooltip-align-annotations t)
   (setq company-tooltip-flip-when-above nil)
+  (setq company-format-margin-function 'company-vscode-dark-icons-margin)
+  (set-face-background 'company-tooltip "gray16")
   (add-to-list 'company-backends '(company-files))
   (global-company-mode))
 
-(use-package company-box
-  :ensure t
-  :hook (company-mode . company-box-mode))
+;; (use-package company-box
+;;   :ensure t
+;;   :hook (company-mode . company-box-mode))
 
 ;; ----------------------------------------------------------------------------
 ;; projectile
@@ -1101,8 +1102,8 @@
   (setq lsp-imenu-index-symbol-kinds
         '(Namespace Function Class Struct Constructor Method Operator Property Interface Enum EnumMember))
   (setq lsp-imenu-sort-methods '(position kind))
-  (setq compilation-read-command nil)
-  (setq compilation-scroll-output t)
+  (setq lsp-completion-show-detail nil)
+  (setq lsp-completion-show-label-description nil)
   :config
   (define-key lsp-mode-map (kbd "C-c l") lsp-command-map))
 
