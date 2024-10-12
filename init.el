@@ -103,11 +103,11 @@
 
 ;; Set fonts
 (defun conf/set-font-faces ()
-  (set-face-attribute 'default nil :font "SourceCodePro Medium-12")
+  (set-face-attribute 'default nil :font "SourceCodePro Medium-13")
   ;; Set the fixed pitch face
-  (set-face-attribute 'fixed-pitch nil :font "SourceCodePro Medium-12")
+  (set-face-attribute 'fixed-pitch nil :font "SourceCodePro Medium-13")
   ;; Set the variable pitch face
-  (set-face-attribute 'variable-pitch nil :font "Cantarell" :height 120 :weight 'regular))
+  (set-face-attribute 'variable-pitch nil :font "Cantarell" :height 130 :weight 'regular))
 (add-hook 'server-after-make-frame-hook #'conf/set-font-faces)
 
 (unless (daemonp)
@@ -117,7 +117,7 @@
 (add-to-list 'default-frame-alist '(height . 50))
 (add-to-list 'default-frame-alist '(width . 140))
 (add-to-list 'default-frame-alist '(vertical-scroll-bars . nil))
-(add-to-list 'default-frame-alist '(font . "SourceCodePro Medium-12"))
+(add-to-list 'default-frame-alist '(font . "SourceCodePro Medium-13"))
 
 ;; Set more useful frame title, that show either a file or a
 ;; buffer name (if the buffer isn't visiting a file)
@@ -302,7 +302,8 @@
 (use-package exec-path-from-shell
   :ensure t
   :config
-  (setq exec-path-from-shell-variables '("PATH"))
+  (setq exec-path-from-shell-variables
+        '("PATH" "DISPLAY" "WAYLAND_DISPLAY" "WINDOWID" "XAUTHORITY"))
   (exec-path-from-shell-initialize))
 
 (use-package page-break-lines
@@ -394,10 +395,10 @@
   :ensure t
   :bind ("C-j" . ace-jump-mode))
 
-(use-package smart-tabs-mode
-  :ensure t
-  :init
-  (smart-tabs-insinuate 'c 'c++))
+;; (use-package smart-tabs-mode
+;;  :ensure t
+;;  :init
+;;  (smart-tabs-insinuate 'c 'c++))
 
 ;; ----------------------------------------------------------------------------
 ;; Windows and UI related packages configs
@@ -417,13 +418,11 @@
   :config
   (default-text-scale-mode))
 
-(use-package all-the-icons
+(use-package nerd-icons
   :ensure t
-  :config
-  (setq all-the-icons-scale-factor 1.1)
-  ;;(setq all-the-icons-scale-factor 1.1)
-  (unless (file-exists-p (expand-file-name "~/.local/share/fonts/all-the-icons.ttf"))
-    (all-the-icons-install-fonts)))
+  ;;:init
+  ;;(nerd-icons-font-family "Symbols Nerd Font Mono")
+  )
 
 ;; ----------------------------------------------------------------------------
 ;; Themes packages configs
@@ -449,9 +448,10 @@
   (setq doom-modeline-bar-width 4)
   (setq doom-modeline-buffer-file-name-style 'buffer-name)
   (setq doom-modeline-icon (display-graphic-p))
+  (setq doom-modeline-icon t)
   (setq doom-modeline-project-detection 'projectile)
   (setq doom-modeline-major-mode-icon t)
-  (setq doom-modeline-major-mode-color-icon t)
+  (setq doom-modeline-major-mode-color-icon nil)
   (setq doom-modeline-buffer-encoding nil)
   (setq doom-modeline-vcs-max-length 20)
   (setq find-file-visit-truename t)
@@ -494,12 +494,12 @@
   (setq dired-recursive-copies 'always)
   (setq dired-recursive-deletes 'always))
 
-(use-package dired-single
-  :ensure t
-  :bind (([remap dired-find-file] . dired-single-buffer)
-         ([remap dired-mouse-find-file-other-window] . dired-single-buffer-mouse)
-         ([remap dired-up-directory] . dired-single-up-directory))
-  :commands (dired dired-jump))
+;; (use-package dired-single
+;;   :ensure t
+;;   :bind (([remap dired-find-file] . dired-single-buffer)
+;;          ([remap dired-mouse-find-file-other-window] . dired-single-buffer-mouse)
+;;          ([remap dired-up-directory] . dired-single-up-directory))
+;;   :commands (dired dired-jump))
 
 (use-package dired-hide-dotfiles
   :ensure t
@@ -507,9 +507,9 @@
   :config
   (define-key dired-mode-map "." #'dired-hide-dotfiles-mode))
 
-(use-package all-the-icons-dired
+(use-package nerd-icons-dired
   :ensure t
-  :hook ((dired-mode . all-the-icons-dired-mode)))
+  :hook ((dired-mode . nerd-icons-dired-mode)))
 
 ;; ----------------------------------------------------------------------------
 ;; ibuffer
@@ -544,7 +544,7 @@
 (use-package ibuffer-projectile
   :ensure t
   :after projectile
-  :functions all-the-icons-octicon ibuffer-do-sort-by-alphabetic
+  :functions nerd-icons-octicon ibuffer-do-sort-by-alphabetic
   :hook (ibuffer . (lambda ()
                      (ibuffer-projectile-set-filter-groups)
                      (unless (eq ibuffer-sorting-mode 'alphabetic)
@@ -552,15 +552,15 @@
   :config
   (setq ibuffer-projectile-prefix
         (concat
-         (all-the-icons-octicon "file-directory"
-                                :face ibuffer-filter-group-name-face
-                                :v-adjust 0.0
-                                :height 1.0)
+         (nerd-icons-sucicon "nf-custom-folder_oct"
+                             :face ibuffer-filter-group-name-face
+                             :v-adjust 0.0
+                             :height 1.0)
              " ")))
 
-(use-package all-the-icons-ibuffer
+(use-package nerd-icons-ibuffer
   :ensure t
-  :hook (ibuffer-mode . all-the-icons-ibuffer-mode))
+  :hook (ibuffer-mode . nerd-icons-ibuffer-mode))
 
 ;; ----------------------------------------------------------------------------
 ;; vterm
@@ -738,15 +738,15 @@
   :bind ("C-S-a" . consult-ag))
 
 ;; ----------------------------------------------------------------------------
-;; all-the-icons-completion
+;; nerd-icons-completion
 ;; ----------------------------------------------------------------------------
 
-(use-package all-the-icons-completion
+(use-package nerd-icons-completion
   :ensure t
-  :after (marginalia all-the-icons)
-  :hook (marginalia-mode . all-the-icons-completion-marginalia-setup)
-  :init
-  (all-the-icons-completion-mode))
+  :after marginalia
+  :hook (marginalia-mode . nerd-icons-completion-marginalia-setup)
+  :config
+  (nerd-icons-completion-mode))
 
 ;; ----------------------------------------------------------------------------
 ;; company
@@ -1069,6 +1069,11 @@
 (use-package treemacs-projectile
   :ensure t
   :after projectile)
+
+(use-package treemacs-nerd-icons
+  :ensure t
+  :config
+  (treemacs-load-theme "nerd-icons"))
 
 ;; ----------------------------------------------------------------------------
 ;; LSP mode
