@@ -471,13 +471,14 @@
   :init
   (setq initial-buffer-choice (lambda () (get-buffer "*dashboard*")))
   (add-hook 'after-init-hook 'dashboard-refresh-buffer)
+  (setq dashboard-icon-type 'nerd-icons)
+  (setq dashboard-set-heading-icons t)
+  (setq dashboard-navigation-cycle t)
+  (setq dashboard-set-file-icons t)
   :config
   (setq dashboard-banner-logo-title "")
   (setq dashboard-page-separator "\n\f\n")
   (setq dashboard-startup-banner 'logo)
-  (setq dashboard-set-heading-icons t)
-  (setq dashboard-set-file-icons t)
-  (setq dashboard-set-footer nil)
   (setq dashboard-items '((recents  . 10) (projects . 5)))
   (dashboard-setup-startup-hook))
 
@@ -744,9 +745,9 @@
 (use-package nerd-icons-completion
   :ensure t
   :after marginalia
-  :hook (marginalia-mode . nerd-icons-completion-marginalia-setup)
   :config
-  (nerd-icons-completion-mode))
+  (nerd-icons-completion-mode)
+  (add-hook 'marginalia-mode-hook #'nerd-icons-completion-marginalia-setup))
 
 ;; ----------------------------------------------------------------------------
 ;; company
