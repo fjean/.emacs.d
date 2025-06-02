@@ -947,7 +947,7 @@
   :bind (:map pyvenv-mode-map
               ("C-c v" . pyvenv-workon))
   :config
-  (setenv "WORKON_HOME" (expand-file-name "~/.local/miniconda3/envs/"))
+  (setenv "WORKON_HOME" (expand-file-name "~/.local/miniconda/envs/"))
   (setq pyvenv-menu t))
 
 (use-package python-pytest
